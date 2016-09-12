@@ -1,0 +1,44 @@
+version: "2"
+
+services: 
+  app:
+    build: .
+    environment:
+      - RAILS_ENV=development
+    command: [ "/opt/startup.sh" ]
+    ports: 
+      - "3000:3000" #specify host and container ... later we'll change this from 'ports' to 'expose'
+    env_file: .env
+    links:
+      - db
+  
+  # write entire docker compose like this and then use it as sort of a checklist
+  db: 
+    # just want to specify an image
+    image: postgres:9.4
+    volumes: #volume where you store the data
+      - postgres:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    command: redis-server
+    ports:
+      - "6379" # redis default port number. need to make a volume for this:
+    volumes:
+      - redis:/var/lib/redis/data
+
+  sidekiq: #name of service
+    build: . #use same docker file 
+    links: 
+      - db
+      - redis # -C means it references a file
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    env_file: .env
+
+volumes:
+  #in version 1 if you created a named volume and .. something about specifying
+  postgres: 
+  redis: #add this to get it working
+
+  #have to create docker and startup.sh file
+  # docker-compose will automatically look for dockerfile if you just specify build

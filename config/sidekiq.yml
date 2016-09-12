@@ -1,0 +1,9 @@
+development: 
+  concurrency: 2
+production: 
+  concurrency: 2
+queues:
+  - default
+  - mailers 
+
+  #more than 2 and you might overwhelm the db
